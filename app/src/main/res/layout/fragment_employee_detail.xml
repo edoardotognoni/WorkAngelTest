@@ -29,4 +29,10 @@
             android:layout_gravity="center_horizontal"
             android:id="@+id/employee_department"
             android:textSize="@dimen/employee_department_text_detail_size"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:id="@+id/employee_about"/>
 </LinearLayout>
