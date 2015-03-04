@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
@@ -17,6 +18,7 @@ import com.workangel.tech.test.network.Constants;
 import com.workangel.tech.test.network.FactoryNetworkManager;
 import com.workangel.tech.test.network.FactoryNetworkManagerInterface;
 import com.workangel.tech.test.network.ResultCallback;
+import de.greenrobot.event.EventBus;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -30,51 +32,85 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private static final String TAG = FragmentListEmployees.class.getSimpleName();
     private ListView mRoot;
     public static final int EMPLOYEES_LOADER_ID = 1000;
+    /**
+     * Key used to retain the list on orientation changes
+     */
+    public static final String KEY_EMPLOYEES_LIST = "key_employees_list";
+    private List<Employee> mEmployeesList;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mRoot = (ListView) inflater.inflate(R.layout.simple_list_layout, container, false);
 
-        //Make the API call to get employees data
-        FactoryNetworkManagerInterface networkManagerInterface = FactoryNetworkManager.getInstance(getActivity(),
-                                                                                                   FactoryNetworkManager.NetworkFramework.RETROFIT);
+        /**
+         * If we come from a configuration change, show old data. We don't need to
+         * call the API every time we change from portrait to landscape and viceversa
+         */
+        if (savedInstanceState != null) {
+            mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
+            mRoot.setAdapter(new EmployeesListAdapter(getActivity(),mEmployeesList));
+        }
+        else {
+            //Make the API call to get employees data
+            FactoryNetworkManagerInterface networkManagerInterface = FactoryNetworkManager.getInstance(getActivity(),
+                                                                                                       FactoryNetworkManager.NetworkFramework.RETROFIT);
 
-        networkManagerInterface.getAllEmployees(new ResultCallback<List<Employee>>() {
 
-            @Override
-            public void onSuccess(List<Employee> result) {
-                Log.d(TAG, "Employees downloaded successfully");
-                if (isAdded()) {
-                    //Save emplyees to DB
-                    saveEmployeesAsync(result);
+            networkManagerInterface.getAllEmployees(new ResultCallback<List<Employee>>() {
 
-                }
-            }
+                @Override
+                public void onSuccess(List<Employee> result) {
+                    Log.d(TAG, "Employees downloaded successfully");
+                    if (isAdded()) {
+                        //Save emplyees to DB
+                        saveEmployeesAsync(result);
 
-            @Override
-            public void onError(int errorCode) {
-                if (isAdded()) {
-                    switch (errorCode) {
-                        case Constants.CONVERSION_PROBLEM:
-                        case Constants.UNEXPECTED_ERROR:
-                            Crouton.makeText(getActivity(), getString(R.string.data_invalid_contact_server_admin),
-                                             Style.ALERT);
-                            break;
-                        case Constants.NETWORK_PROBLEM:
-                            Crouton.makeText(getActivity(), getString(R.string.error_network_problem),
-                                             Style.ALERT);
-                            break;
                     }
                 }
-            }
-        });
 
-        /**
-         * While we wait for the API call to finish, we show old data from DB
-         */
-        getLoaderManager().initLoader(EMPLOYEES_LOADER_ID,null,this).forceLoad();
+                @Override
+                public void onError(int errorCode) {
+                    if (isAdded()) {
+                        switch (errorCode) {
+                            case Constants.CONVERSION_PROBLEM:
+                            case Constants.UNEXPECTED_ERROR:
+                                Crouton.makeText(getActivity(), getString(R.string.data_invalid_contact_server_admin),
+                                                 Style.ALERT);
+                                break;
+                            case Constants.NETWORK_PROBLEM:
+                                Crouton.makeText(getActivity(), getString(R.string.error_network_problem),
+                                                 Style.ALERT);
+                                break;
+                        }
+                    }
+                }
+            });
+
+            /**
+             * While we wait for the API call to finish, we show old data from DB
+             */
+            getLoaderManager().initLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
+
+            /**
+             * Set a click listener to move to the employee detail fragment
+             */
+            mRoot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Employee employee = (Employee) parent.getItemAtPosition(position);
+                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
+                }
+            });
+        }
         return mRoot;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(KEY_EMPLOYEES_LIST,
+                                        (java.util.ArrayList<? extends android.os.Parcelable>) mEmployeesList);
     }
 
     /**
@@ -112,6 +148,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<List<Employee>> loader, List<Employee> data) {
+        mEmployeesList = data;
         if (isAdded()) {
             //Update UI
             EmployeesListAdapter adapter = (EmployeesListAdapter) mRoot.getAdapter();

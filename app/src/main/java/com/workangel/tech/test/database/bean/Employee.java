@@ -1,5 +1,7 @@
 package com.workangel.tech.test.database.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -10,7 +12,7 @@ import java.util.Date;
  * Basic bean representing an Employee
  */
 @DatabaseTable
-public class Employee {
+public class Employee implements Parcelable{
     private static final String TAG = Employee.class.getSimpleName();
 
     /**
@@ -49,6 +51,12 @@ public class Employee {
     @DatabaseField(dataType = DataType.SERIALIZABLE)
     private int[] subordinates;
 
+    /**
+     * Basic constructor
+     */
+    public Employee() {
+
+    }
 
     public int get_id() {
         return _id;
@@ -154,4 +162,66 @@ public class Employee {
     public int hashCode() {
         return _id;
     }
+
+    protected Employee(Parcel in) {
+        _id = in.readInt();
+        firstName = in.readString();
+        lastName = in.readString();
+        about = in.readString();
+        phone = in.readString();
+        avatar = in.readString();
+        address = in.readString();
+        email = in.readString();
+        long tmpDob = in.readLong();
+        dob = tmpDob != -1 ? new Date(tmpDob) : null;
+        department = in.readString();
+
+        //Check if subordinates was null
+        if(in.readByte() == (byte)1) {
+            subordinates = in.createIntArray();
+        }
+        else {
+            subordinates = new int[0];
+        }
+
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(_id);
+        dest.writeString(firstName);
+        dest.writeString(lastName);
+        dest.writeString(about);
+        dest.writeString(phone);
+        dest.writeString(avatar);
+        dest.writeString(address);
+        dest.writeString(email);
+        dest.writeLong(dob != null ? dob.getTime() : -1L);
+        dest.writeString(department);
+        if (subordinates != null && subordinates.length > 0) {
+            dest.writeByte((byte) 1);
+            dest.writeIntArray(subordinates);
+        }
+        else {
+            dest.writeByte((byte) 0);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Employee> CREATOR = new Parcelable.Creator<Employee>() {
+        @Override
+        public Employee createFromParcel(Parcel in) {
+            return new Employee(in);
+        }
+
+        @Override
+        public Employee[] newArray(int size) {
+            return new Employee[size];
+        }
+    };
 }
