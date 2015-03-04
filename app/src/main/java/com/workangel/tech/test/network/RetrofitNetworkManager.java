@@ -13,6 +13,7 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import retrofit.converter.GsonConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +32,15 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
         mContext = applicationContext;
         String endPoint = mContext.getResources().getString(R.string.base_url);
 
+        /** Custom converter */
+        Gson gson = new GsonBuilder()
+            .setDateFormat(Constants.DATE_FORMAT)
+            .create();
+
         /** Create retrofit rest adapter */
         RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(endPoint)
+            .setConverter(new GsonConverter(gson))
             .setLogLevel(BuildConfig.DEBUG ? RestAdapter.LogLevel.FULL : RestAdapter.LogLevel.NONE)
             .build();
 
@@ -56,12 +63,10 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
 
     @Override
     public void getAllEmployees(final ResultCallback<List<Employee>> responseCallback) {
-        mRetrofitNetwrokInterface.getEmployees(new Callback<JSONArray>() {
+        mRetrofitNetwrokInterface.getEmployees(new Callback<List<Employee>>() {
             @Override
-            public void success(JSONArray employees, Response response) {
-                // I chose to manual convert the JSON in order to avoid 2 tables (Employee, Name)
-                // The Name table would be useless
-                getEmployeesFromJson(employees, responseCallback);
+            public void success(List<Employee> employees, Response response) {
+                responseCallback.onSuccess(employees);
             }
 
             @Override
@@ -118,4 +123,6 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
 
         return employeesList;
     }
+
+
 }

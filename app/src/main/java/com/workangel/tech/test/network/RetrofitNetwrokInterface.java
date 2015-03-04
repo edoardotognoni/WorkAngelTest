@@ -1,8 +1,10 @@
 package com.workangel.tech.test.network;
 
-import org.json.JSONArray;
+import com.workangel.tech.test.database.bean.Employee;
 import retrofit.Callback;
 import retrofit.http.GET;
+
+import java.util.List;
 
 /**
  * Network manager implementing Singleton pattern. I chose to use this pattern in case we need
@@ -15,7 +17,7 @@ public interface RetrofitNetwrokInterface {
      * @param responseCallback Callback called in case of success or failure
      */
     @GET("/get/HH-iNTU")
-    public void getEmployees(Callback<JSONArray> responseCallback);
+    public void getEmployees(Callback<List<Employee>> responseCallback);
 
 
 }
