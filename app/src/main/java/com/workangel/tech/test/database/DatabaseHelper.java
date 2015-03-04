@@ -70,7 +70,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         if (null == mEmployeesDao) {
             try {
                 mEmployeesDao = getDao(Employee.class);
-            }catch (java.sql.SQLException e) {
+            }
+            catch (java.sql.SQLException e) {
                 e.printStackTrace();
             }
         }

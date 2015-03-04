@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">WorkAngelTechTest</string>
+    <string name="data_invalid_contact_server_admin">Data from server is invalid. Please contact server administration</string>
+    <string name="error_network_problem">Can\'t download data. Check your internet connection</string>
+    <string name="department_arg">"Department: %1$s"</string>
 
 </resources>

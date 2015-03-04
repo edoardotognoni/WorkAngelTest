@@ -1,5 +1,6 @@
 package com.workangel.tech.test.database.bean;
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -45,7 +46,7 @@ public class Employee {
     @DatabaseField
     private String department;
 
-    @DatabaseField
+    @DatabaseField(dataType = DataType.SERIALIZABLE)
     private int[] subordinates;
 
 

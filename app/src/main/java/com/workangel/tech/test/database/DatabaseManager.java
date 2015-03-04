@@ -43,7 +43,7 @@ public class DatabaseManager {
      * Get all employess saved on DB
      * @return Full employees list
      */
-    private List<Employee> getAllEmployees() {
+    public List<Employee> getAllEmployees() {
         try {
             return helper.getEmployeesDao().queryForAll();
         }
@@ -61,7 +61,7 @@ public class DatabaseManager {
      * Persists the employees on DB
      * @param employees Employees list
      */
-    private void saveEmployees(final List<Employee> employees) {
+    public void saveEmployees(final List<Employee> employees) {
         try {
             for (Employee employee : employees) {
                 helper.getEmployeesDao().createOrUpdate(employee);
