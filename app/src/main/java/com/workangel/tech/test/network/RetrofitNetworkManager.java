@@ -1,6 +1,7 @@
 package com.workangel.tech.test.network;
 
 import android.content.Context;
+import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.workangel.tech.test.BuildConfig;
@@ -15,6 +16,9 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +54,9 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
 
     /**
      * Get Retrofit network instance
+     *
      * @param context Context
+     *
      * @return RetrofitNetworkManager instance
      */
     protected static RetrofitNetworkManager getInstance(Context context) {
@@ -61,12 +67,48 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
         return sWorkAngelTestNetworkManager;
     }
 
+    /**
+     * Get response body as string
+     * @param response Retrofit response
+     * @return String body
+     * @throws IOException If connection fails
+     */
+    private String getStringResponse(Response response) throws IOException {
+        //Try to get response body
+        BufferedReader reader = null;
+        StringBuilder sb = new StringBuilder();
+
+        reader = new BufferedReader(new InputStreamReader(response.getBody().in()));
+
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+
+
+        return sb.toString();
+    }
+
     @Override
     public void getAllEmployees(final ResultCallback<List<Employee>> responseCallback) {
-        mRetrofitNetwrokInterface.getEmployees(new Callback<List<Employee>>() {
+        mRetrofitNetwrokInterface.getEmployees(new Callback<Response>() {
             @Override
-            public void success(List<Employee> employees, Response response) {
-                responseCallback.onSuccess(employees);
+            public void success(Response employees, Response response) {
+                try {
+                    List<Employee> employeeList = getEmployeesFromJson(getStringResponse(employees));
+                    responseCallback.onSuccess(employeeList);
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e(TAG,"Conversion error");
+                    responseCallback.onError(Constants.CONVERSION_PROBLEM);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG,"Network error");
+                    responseCallback.onError(Constants.NETWORK_PROBLEM);
+                }
             }
 
             @Override
@@ -92,33 +134,27 @@ public class RetrofitNetworkManager implements FactoryNetworkManagerInterface {
 
     /**
      * Parse JSON array to get Employees list
+     *
      * @return Employees list
      */
-    private List<Employee> getEmployeesFromJson(JSONArray employees, ResultCallback<List<Employee>> responseCallback) {
+    private List<Employee> getEmployeesFromJson(String employeesString) throws JSONException {
         List<Employee> employeesList = new ArrayList<>();
         Gson gson = new GsonBuilder().setDateFormat(Constants.DATE_FORMAT).create();
-        for (int i = 0; i < employees.length(); i++) {
-            try {
-                JSONObject employee = employees.getJSONObject(i);
-                Employee employeeBean = gson.fromJson(employee.toString(),Employee.class);
-                if (employee.has("name")) {
-                    JSONObject nameObject = employee.getJSONObject("name");
-                    if (nameObject.has("first")) {
-                        employeeBean.setFirstName(nameObject.getString("first"));
-                    }
-                    if (nameObject.has("last")) {
-                        employeeBean.setLastName(nameObject.getString("last"));
-                    }
+        JSONArray employees = new JSONArray(employeesString);
+        for (int i = 0 ; i < employees.length(); i++) {
+            JSONObject employee = employees.getJSONObject(i);
+            Employee employeeBean = gson.fromJson(employee.toString(), Employee.class);
+            if (employee.has("name")) {
+                JSONObject nameObject = employee.getJSONObject("name");
+                if (nameObject.has("first")) {
+                    employeeBean.setFirstName(nameObject.getString("first"));
                 }
+                if (nameObject.has("last")) {
+                    employeeBean.setLastName(nameObject.getString("last"));
+                }
+            }
 
-                employeesList.add(employeeBean);
-            }
-            catch (JSONException e) {
-                // There was a problem in converting Employees JSON
-                e.printStackTrace();
-                responseCallback.onError(Constants.CONVERSION_PROBLEM);
-                return null;
-            }
+            employeesList.add(employeeBean);
         }
 
         return employeesList;
