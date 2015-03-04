@@ -42,7 +42,16 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mRoot = (ListView) inflater.inflate(R.layout.simple_list_layout, container, false);
-
+        /**
+         * Set a click listener to move to the employee detail fragment
+         */
+        mRoot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Employee employee = (Employee) parent.getItemAtPosition(position);
+                EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
+            }
+        });
         /**
          * If we come from a configuration change, show old data. We don't need to
          * call the API every time we change from portrait to landscape and viceversa
@@ -91,17 +100,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
              * While we wait for the API call to finish, we show old data from DB
              */
             getLoaderManager().initLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
-
-            /**
-             * Set a click listener to move to the employee detail fragment
-             */
-            mRoot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Employee employee = (Employee) parent.getItemAtPosition(position);
-                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
-                }
-            });
         }
         return mRoot;
     }

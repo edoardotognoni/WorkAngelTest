@@ -18,7 +18,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         //Check if fragment has to be recreated or not
-        FragmentListEmployees fragment = (FragmentListEmployees) getSupportFragmentManager().findFragmentById(
+        Fragment fragment =  getSupportFragmentManager().findFragmentById(
             R.id.fragment_container);
 
         if (fragment == null) {
@@ -53,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
         bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
         employeeDetail.setArguments(bundle);
         getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, employeeDetail)
+                                   .add(R.id.fragment_container, employeeDetail)
                                    .addToBackStack(null)
                                    .commit();
     }
