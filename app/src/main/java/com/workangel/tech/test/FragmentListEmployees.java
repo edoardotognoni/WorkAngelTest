@@ -6,12 +6,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
@@ -40,6 +42,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private List<Employee> mEmployeesList;
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;
+    private SearchView mEmployeesSearch;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -48,7 +51,44 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
         mEmployeesListView = (ListView) root.findViewById(R.id.employees_list);
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
+        mEmployeesSearch = (SearchView) root.findViewById(R.id.employees_search);
+        mEmployeesSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
+                String department = (String) mDepartmentSpinner.getSelectedItem();
+                //First filter for department
+                List<Employee> employeesForDeprt = mDepartmentEmployeesMap.get(department);
+                if (adapter != null) {
+                    if (employeesForDeprt == null) {
+                        //Just in case
+                        employeesForDeprt = new ArrayList<Employee>();
+                    }
+
+                    if (TextUtils.isEmpty(newText)) {
+                        adapter.setEmployees(employeesForDeprt);
+                    }
+                    else {
+                        List<Employee> filteredEmployees = new ArrayList<Employee>();
+                        for (Employee  employee : employeesForDeprt) {
+                            String name = (employee.getLastName() + " " + employee.getFirstName()).toUpperCase(Locale.US);
+                            if (name.contains(newText.toUpperCase(Locale.US))) {
+                                filteredEmployees.add(employee);
+                            }
+                        }
+                        adapter.setEmployees(filteredEmployees);
+                    }
+                    adapter.notifyDataSetChanged();
+
+                }
+                return true;
+            }
+        });
         /**
          * Set a click listener to move to the employee detail fragment
          */
@@ -154,6 +194,10 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
             }
         });
+
+        //Show filter views
+        mDepartmentSpinner.setVisibility(View.VISIBLE);
+        mEmployeesSearch.setVisibility(View.VISIBLE);
     }
 
     @Override
