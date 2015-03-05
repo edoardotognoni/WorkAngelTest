@@ -1,39 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/main_background_color"
-              android:clickable="true"
-              android:padding="10dp">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/main_background_color"
+            android:clickable="true">
 
 
-    <ImageView
-            android:layout_width="@dimen/employee_avatar_detail_size"
-            android:layout_height="@dimen/employee_avatar_detail_size"
-            android:id="@+id/employee_avatar"
-            android:layout_gravity="center_horizontal"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:padding="10dp">
 
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/employee_name"
-            android:layout_gravity="center_horizontal"
-            android:textSize="@dimen/employee_name_text_detail_size"
-            android:textColor="@android:color/black"/>
+        <ImageView
+                android:layout_width="@dimen/employee_avatar_detail_size"
+                android:layout_height="@dimen/employee_avatar_detail_size"
+                android:id="@+id/employee_avatar"
+                android:layout_gravity="center_horizontal"/>
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/employee_department"
-            android:textSize="@dimen/employee_department_text_detail_size"/>
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:id="@+id/employee_about"/>
-</LinearLayout>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/employee_name"
+                android:layout_gravity="center_horizontal"
+                android:textSize="@dimen/employee_name_text_detail_size"
+                android:textColor="@color/main_color"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/employee_department"
+                android:textStyle="bold"
+                android:textSize="@dimen/employee_department_text_detail_size"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textStyle="italic"
+                android:id="@+id/employee_about"/>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_button_accent_background"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal"
+                android:id="@+id/phone_layout"
+                android:padding="10dp">
+            <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/phone"
+                    android:layout_centerVertical="true"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/phone"
+                    android:text="asdsdgsdg"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_button_accent_background"
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                android:id="@+id/sms_layout"
+                android:padding="10dp">
+            <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/email"
+                    android:layout_centerVertical="true"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sms"
+                    android:text="asdsdgsdg"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_button_accent_background"
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                android:id="@+id/address_layout"
+                android:padding="10dp">
+            <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/address"
+                    android:layout_centerVertical="true"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/address"
+                    android:text="asdsdgsdg"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_button_accent_background"
+                android:orientation="horizontal"
+                android:layout_marginTop="5dp"
+                android:id="@+id/email_layout"
+                android:padding="10dp">
+            <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/email"
+                    android:layout_centerVertical="true"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/email"
+                    android:text="asdsdgsdg"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

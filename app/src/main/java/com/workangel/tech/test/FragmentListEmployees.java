@@ -47,7 +47,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
      */
     private List<Employee> mEmployeesList;
     /**
-     *
+     * Map where keys are department strings and values are their respective employees
      */
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;

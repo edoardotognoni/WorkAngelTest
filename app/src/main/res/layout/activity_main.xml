@@ -17,7 +17,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/work_angel"
-                    android:textColor="@color/toolbar_title_color"
+                    android:textColor="@color/main_color"
                     android:textSize="@dimen/login_action_bar_title_size"/>
 
             <TextView
