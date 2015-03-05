@@ -25,5 +25,6 @@
     <string name="subordinates">Subordinates:</string>
     <string name="none">None</string>
     <string name="search_name_hint">Search employee name…</string>
+    <string name="dont_have_google_maps">Don\'t have Google Maps? Bad guy...</string>
 
 </resources>

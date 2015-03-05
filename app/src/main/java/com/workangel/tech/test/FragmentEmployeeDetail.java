@@ -1,5 +1,6 @@
 package com.workangel.tech.test;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import com.koushikdutta.ion.Ion;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.hierarchy.Node;
 import de.greenrobot.event.EventBus;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 import java.util.List;
 import java.util.Locale;
@@ -180,7 +183,12 @@ public class FragmentEmployeeDetail extends Fragment {
 
     private void showMap(String address) {
         String uri = "geo:0,0?q=" + address;
-        startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+        try {
+            startActivity(new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri)));
+        }
+        catch (ActivityNotFoundException ex) {
+            Crouton.makeText(getActivity(),getString(R.string.dont_have_google_maps), Style.ALERT).show();
+        }
     }
 
     private void call(String phone) {
