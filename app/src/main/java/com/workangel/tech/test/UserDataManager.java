@@ -74,7 +74,6 @@ public class UserDataManager {
             prefs = context.getSharedPreferences(KEY_SHARED_PREFERENCES,Context.MODE_PRIVATE);
         }
         SharedPreferences.Editor editor = prefs.edit();
-        // TODO: implement encryption or store into private DB
 
         editor.putInt(key, value);
         editor.commit();
@@ -95,7 +94,6 @@ public class UserDataManager {
             prefs = context.getSharedPreferences(KEY_SHARED_PREFERENCES,Context.MODE_PRIVATE);
         }
         SharedPreferences.Editor editor = prefs.edit();
-        // TODO: implement encryption or store into private DB
 
         editor.putLong(key, value);
         editor.commit();
