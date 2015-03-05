@@ -118,6 +118,22 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                 }
             });
         }
+        else {
+            //Check for tablet in landscape
+            if (findViewById(R.id.fragment_container_2) != null) {
+                //Clear back stack
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                if (fragment instanceof FragmentEmployeeDetail) {
+                    FragmentListEmployees fragmentListEmployees = new FragmentListEmployees();
+                    FragmentEmployeeDetail detail = new FragmentEmployeeDetail();
+                    detail.setArguments(fragment.getArguments());
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragment_container, fragmentListEmployees);
+                    fragmentTransaction.replace(R.id.fragment_container_2, detail);
+                    fragmentTransaction.commit();
+                }
+            }
+        }
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         //After orientation change, check how many fragments we have
@@ -222,34 +238,29 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
      * @param eventTransactToEmployeeDetailFragment Event
      */
     public void onEvent(EventTransactToEmployeeDetailFragment eventTransactToEmployeeDetailFragment) {
+        View fragmentContainer2 = findViewById(R.id.fragment_container_2);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        /**
+         * Check if we are running on a tablet in landscape. If so, just put the next fragment
+         * in the other container
+         */
+        int resource = R.id.fragment_container;
+        if (fragmentContainer2 != null) {
+            //If we are on tablets in landscape we don't need to add to backstack
+            resource = R.id.fragment_container_2;
+        }
+        else {
+            transaction.addToBackStack(null);
+        }
         Fragment employeeDetail = new FragmentEmployeeDetail();
         Bundle bundle = new Bundle();
         bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
         bundle.putParcelable(FragmentEmployeeDetail.KEY_NODE, eventTransactToEmployeeDetailFragment.getNode());
         employeeDetail.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, employeeDetail)
-                                   .addToBackStack(null)
-                                   .commit();
+        transaction.replace(resource, employeeDetail)
+                   .commit();
     }
 
-    /**
-     * Called by EventBus when someone fires an {@link com.workangel.tech.test.MainActivity
-     * .EventTransactToSubordinateOrBossFragment}
-     *
-     * @param eventTransactToEmployeeDetailFragment Event
-     */
-    public void onEvent(EventTransactToSubordinateOrBossFragment eventTransactToEmployeeDetailFragment) {
-        Fragment employeeDetail = new FragmentEmployeeDetail();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
-        bundle.putParcelable(FragmentEmployeeDetail.KEY_NODE, eventTransactToEmployeeDetailFragment.getNode());
-        employeeDetail.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.fragment_container, employeeDetail)
-                                   .addToBackStack(null)
-                                   .commit();
-    }
 
     /**
      * Called when something in the fragments backstack changes. If the fragment backstack has more than 0 elements
@@ -299,36 +310,4 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         }
     }
 
-    /**
-     * This event is fired when the user clicks on a subordinate employee
-     * or on a boss employee from the Detail page
-     */
-    public static class EventTransactToSubordinateOrBossFragment {
-        private Employee mEmployee;
-        private Node mNode;
-
-        /**
-         * Constructor
-         *
-         * @param employee Employee to be displayed
-         * @param node     Node representing the Employee in the Hierarchy tree
-         */
-
-        public EventTransactToSubordinateOrBossFragment(Employee employee, Node node) {
-            mEmployee = employee;
-            mNode = node;
-        }
-
-        public Employee getEmployee() {
-            return mEmployee;
-        }
-
-        public Node getNode() {
-            return mNode;
-        }
-
-        public void setNode(Node node) {
-            mNode = node;
-        }
-    }
 }

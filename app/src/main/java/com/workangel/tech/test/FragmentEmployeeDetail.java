@@ -68,7 +68,7 @@ public class FragmentEmployeeDetail extends Fragment {
                 @Override
                 public void onClick(View v) {
 
-                    EventBus.getDefault().post(new MainActivity.EventTransactToSubordinateOrBossFragment(boss,mNode.getParent()));
+                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(boss,mNode.getParent()));
                 }
             });
         }
@@ -88,7 +88,7 @@ public class FragmentEmployeeDetail extends Fragment {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Node employeeNode = (Node) parent.getItemAtPosition(position);
                     Employee employee = employeeNode.getData();
-                    EventBus.getDefault().post(new MainActivity.EventTransactToSubordinateOrBossFragment(employee,employeeNode));
+                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee,employeeNode));
                 }
             });
         }
