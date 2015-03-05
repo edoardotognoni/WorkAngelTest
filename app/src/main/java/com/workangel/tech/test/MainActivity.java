@@ -2,13 +2,16 @@ package com.workangel.tech.test;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import com.workangel.tech.test.database.bean.Employee;
 import de.greenrobot.event.EventBus;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements FragmentManager.OnBackStackChangedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
@@ -16,6 +19,19 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Setup toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
+        });
+        getSupportActionBar().setIcon(R.drawable.toolbar_icon);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //Check if fragment has to be recreated or not
         Fragment fragment =  getSupportFragmentManager().findFragmentById(
@@ -26,6 +42,8 @@ public class MainActivity extends ActionBarActivity {
             fragmentTransaction.replace(R.id.fragment_container, new FragmentListEmployees());
             fragmentTransaction.commit();
         }
+
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
     }
 
     @Override
@@ -57,6 +75,23 @@ public class MainActivity extends ActionBarActivity {
                                    .addToBackStack(null)
                                    .commit();
     }
+
+    /**
+     * Called when something in the fragments backstack changes. If the fragment backstack has more than 0 elements
+     * show the home button
+     */
+    @Override
+    public void onBackStackChanged() {
+        int backstackCount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (backstackCount == 0) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        else {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     /**
      * Sending an EventTransactToEmployeeDetailFragment lets you move to the
      * Employee detail. Used to make the fragment transaction

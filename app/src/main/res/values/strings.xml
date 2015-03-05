@@ -7,5 +7,7 @@
     <string name="call">Call</string>
     <string name="send_sms">Send SMS</string>
     <string name="contact_request">Contact request</string>
+    <string name="welcome">Welcome</string>
+    <string name="work_angel">WorkAngel</string>
 
 </resources>

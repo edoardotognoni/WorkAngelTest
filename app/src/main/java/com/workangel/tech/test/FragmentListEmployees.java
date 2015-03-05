@@ -85,11 +85,11 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                             case Constants.CONVERSION_PROBLEM:
                             case Constants.UNEXPECTED_ERROR:
                                 Crouton.makeText(getActivity(), getString(R.string.data_invalid_contact_server_admin),
-                                                 Style.ALERT);
+                                                 Style.ALERT).show();
                                 break;
                             case Constants.NETWORK_PROBLEM:
                                 Crouton.makeText(getActivity(), getString(R.string.error_network_problem),
-                                                 Style.ALERT);
+                                                 Style.ALERT).show();
                                 break;
                         }
                     }

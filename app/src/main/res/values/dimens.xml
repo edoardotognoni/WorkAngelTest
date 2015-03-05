@@ -8,4 +8,5 @@
     <dimen name="employee_name_text_detail_size">30sp</dimen>
     <dimen name="employee_department_text_list_size">15sp</dimen>
     <dimen name="employee_department_text_detail_size">20sp</dimen>
+    <dimen name="login_action_bar_title_size">30sp</dimen>
 </resources>
