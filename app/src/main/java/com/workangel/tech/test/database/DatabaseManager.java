@@ -15,7 +15,7 @@ import java.util.List;
  *
  * Implements Singleton pattern
  */
-public class DatabaseManager {
+public class DatabaseManager implements FactoryDatabaseInterface{
     private static final String TAG = DatabaseManager.class.getSimpleName();
 
     /** DatabaseManager instance */
@@ -27,7 +27,7 @@ public class DatabaseManager {
 
 
     /** Get instance as Singleton pattern */
-    public static DatabaseManager getInstance(Context context) {
+    protected static DatabaseManager getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new DatabaseManager(context.getApplicationContext());
         }

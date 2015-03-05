@@ -30,4 +30,5 @@ dependencies {
         // exclusion is not necessary, but generally a good idea.
         exclude group: 'com.google.android', module: 'support-v4'
     }
+    compile 'com.sothree.slidinguppanel:library:3.0.0'
 }

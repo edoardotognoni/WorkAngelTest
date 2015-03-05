@@ -17,7 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.workangel.tech.test.contacts.ContactsSaverIntentService;
-import com.workangel.tech.test.database.DatabaseManager;
+import com.workangel.tech.test.database.FactoryDatabaseInterface;
+import com.workangel.tech.test.database.FactoryDatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
 import com.workangel.tech.test.hierarchy.Node;
@@ -302,7 +303,11 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
             @Override
             protected Void doInBackground(Void... params) {
-                DatabaseManager.getInstance(getActivity()).saveEmployees(employees);
+                FactoryDatabaseInterface dbManager = FactoryDatabaseManager.getInstance(getActivity(),
+                                                                                        FactoryDatabaseManager
+                                                                                            .DatabaseFramework.ORMLITE);
+
+                dbManager.saveEmployees(employees);
                 return null;
             }
 
