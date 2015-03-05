@@ -16,5 +16,9 @@
     <string name="share">Share</string>
     <string name="share_using">Share with</string>
     <string name="share_text_args">"Contact detail:\nName: %1$s\nLast name: %2$s\nPhone: %3$s\nAddress: %4$s\nmail: %5$s\nAbout: %6$s"</string>
+    <string name="want_to_save_contacts">Do you want to save employees on your contacts?</string>
+    <string name="dont_ask_again">Don\'t ask again</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
 
 </resources>

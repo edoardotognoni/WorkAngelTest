@@ -1,11 +1,11 @@
 package com.workangel.tech.test;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -15,10 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Spinner;
+import android.widget.*;
 import com.workangel.tech.test.contacts.ContactsSaverIntentService;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
@@ -82,6 +79,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mLoadingDialog.setMessage(getString(R.string.loading));
         mLoadingDialog.setCancelable(false);
 
+
         mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
             // this behaviour so I hadd a bit of logic to call the method only when the user
@@ -142,8 +140,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             mQueryName = savedInstanceState.getString(KEY_QUERY_NAME);
         }
         else {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            if (!preferences.getBoolean(KEY_DOWNLOADED_ONCE,false)) {
+            if (!UserDataManager.getDownloadedOnce(getActivity())) {
                 //We still don't have available data. Show a loading dialog until we get some
                 mLoadingDialog.show();
             }
@@ -160,10 +157,12 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                     Log.d(TAG, "Employees downloaded successfully");
                     if (isAdded()) {
                         //Save that we downloaded at least once
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean(KEY_DOWNLOADED_ONCE, true);
-                        editor.commit();
+                        UserDataManager.setDownloadedOnce(getActivity(), true);
 
+                        //Save contacts?
+                        if (!UserDataManager.getStopAskingForSavingContacts(getActivity())) {
+                            askToSaveContacts(result);
+                        }
                         //Save emplyees to DB
                         saveEmployeesAsync(result);
                     }
@@ -322,6 +321,42 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
     }
 
+    /**
+     * Shows a dialog to the user which will ask if he wants employees to be
+     * saved on its contacts
+     * @param employees Employees to be saved
+     */
+    private void askToSaveContacts(final List<Employee> employees) {
+        View confirmationDialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_ask_save_contact, null);
+        final CheckBox dontAskAgain = (CheckBox) confirmationDialogView.findViewById(R.id.dont_ask_again);
+        AlertDialog confirmationDialog = new AlertDialog.Builder(getActivity())
+            .setView(confirmationDialogView)
+            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (dontAskAgain.isChecked()) {
+                        UserDataManager.setStopAskingForSavingContacts(getActivity(),true);
+                    }
+                    //Starts service which will save contacts
+                    Intent intent = new Intent(getActivity(), ContactsSaverIntentService.class);
+                    intent.putParcelableArrayListExtra(ContactsSaverIntentService.KEY_EMPLOYEES_LIST,
+                                                       (ArrayList<? extends android.os.Parcelable>) employees);
+                    getActivity().startService(intent);
+                }
+            })
+            .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (dontAskAgain.isChecked()) {
+                        UserDataManager.setStopAskingForSavingContacts(getActivity(),true);
+                    }
+                }
+            })
+            .create();
+
+        confirmationDialog.show();
+
+    }
 
 
     @Override
@@ -338,11 +373,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
             //Filter for department and name if something was set before
             filter();
-            //Save contacts?
-            Intent intent = new Intent(getActivity(), ContactsSaverIntentService.class);
-            intent.putParcelableArrayListExtra(ContactsSaverIntentService.KEY_EMPLOYEES_LIST,
-                                               (ArrayList<? extends android.os.Parcelable>) mEmployeesList);
-            getActivity().startService(intent);
         }
     }
 
