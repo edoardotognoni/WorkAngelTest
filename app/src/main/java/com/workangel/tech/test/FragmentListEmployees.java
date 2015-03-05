@@ -1,6 +1,7 @@
 package com.workangel.tech.test;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import com.workangel.tech.test.contacts.ContactsSaverIntentService;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
@@ -331,9 +333,16 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<List<Employee>> loader, List<Employee> data) {
         mEmployeesList = data;
         if (isAdded()) {
+            //Build map Department-Employees
             buildDepartmentMap(mEmployeesList);
             mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
+            //Filter for department and name if something was set before
             filter();
+            //Save contacts?
+            Intent intent = new Intent(getActivity(), ContactsSaverIntentService.class);
+            intent.putParcelableArrayListExtra(ContactsSaverIntentService.KEY_EMPLOYEES_LIST,
+                                               (ArrayList<? extends android.os.Parcelable>) mEmployeesList);
+            getActivity().startService(intent);
         }
     }
 
