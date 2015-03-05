@@ -11,10 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Spinner;
+import android.widget.*;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.network.Constants;
@@ -70,19 +67,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                         employeesForDeprt = new ArrayList<Employee>();
                     }
 
-                    if (TextUtils.isEmpty(newText)) {
-                        adapter.setEmployees(employeesForDeprt);
-                    }
-                    else {
-                        List<Employee> filteredEmployees = new ArrayList<Employee>();
-                        for (Employee  employee : employeesForDeprt) {
-                            String name = (employee.getLastName() + " " + employee.getFirstName()).toUpperCase(Locale.US);
-                            if (name.contains(newText.toUpperCase(Locale.US))) {
-                                filteredEmployees.add(employee);
-                            }
-                        }
-                        adapter.setEmployees(filteredEmployees);
-                    }
+                    adapter.setEmployees(getEmployeesFilteredForName(employeesForDeprt,newText));
                     adapter.notifyDataSetChanged();
 
                 }
@@ -171,8 +156,16 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             employeesForDept.add(employee);
         }
 
-        //Populate department spinner
-        mDepartmentSpinner.setAdapter(new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap));
+        //Populate department spinner withouth losing previous selection
+        DepartmentSpinnerAdapter adapter = (DepartmentSpinnerAdapter) mDepartmentSpinner.getAdapter();
+        if (adapter == null) {
+            adapter = new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap);
+            mDepartmentSpinner.setAdapter(adapter);
+        }
+        else {
+            adapter.setEmployeesDeptMap(mDepartmentEmployeesMap);
+            adapter.notifyDataSetChanged();
+        }
         mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
             // this behaviour so I hadd a bit of logic to call the method only when the user
@@ -198,6 +191,28 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         //Show filter views
         mDepartmentSpinner.setVisibility(View.VISIBLE);
         mEmployeesSearch.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Filter the employees list and returns a list of employees filtered by name
+     * @param employees Employees list input
+     * @param filter String filter
+     * @return List employees filtered
+     */
+    private List<Employee> getEmployeesFilteredForName(List<Employee> employees, String filter) {
+        if (TextUtils.isEmpty(filter)) {
+            return employees;
+        }
+        else {
+            List<Employee> filteredEmployees = new ArrayList<Employee>();
+            for (Employee  employee : employees) {
+                String name = (employee.getLastName() + " " + employee.getFirstName()).toUpperCase(Locale.US);
+                if (name.contains(filter.toUpperCase(Locale.US))) {
+                    filteredEmployees.add(employee);
+                }
+            }
+            return filteredEmployees;
+        }
     }
 
     @Override
@@ -235,6 +250,8 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
     }
 
+
+
     @Override
     public Loader<List<Employee>> onCreateLoader(int id, Bundle args) {
         return new EmployeesLoader(getActivity());
@@ -245,14 +262,18 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mEmployeesList = data;
         if (isAdded()) {
             buildDepartmentMap(mEmployeesList);
+            //Better pick list from Map becuase probably user has already selected a department
+            String department = (String) mDepartmentSpinner.getSelectedItem();
+            List<Employee> employeesForDeptChosen = mDepartmentEmployeesMap.get(department);
             //Update UI
             EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
+            List<Employee> employeesFiltered = getEmployeesFilteredForName(employeesForDeptChosen,mEmployeesSearch.getQuery().toString());
             if (adapter == null) {
-                adapter = new EmployeesListAdapter(getActivity(),data);
+                adapter = new EmployeesListAdapter(getActivity(),employeesFiltered);
                 mEmployeesListView.setAdapter(adapter);
             }
             else {
-                adapter.setEmployees(data);
+                adapter.setEmployees(employeesFiltered);
                 adapter.notifyDataSetChanged();
             }
         }

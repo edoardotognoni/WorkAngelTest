@@ -36,8 +36,7 @@ public class DepartmentSpinnerAdapter extends BaseAdapter {
      */
     public DepartmentSpinnerAdapter(Context context, Map<String,List<Employee>> employeesDeptMap) {
         mContext = context;
-        mEmployeesDeptMap = employeesDeptMap;
-        departments = new ArrayList<>(mEmployeesDeptMap.keySet());
+        setEmployeesDeptMap(employeesDeptMap);
     }
 
     @Override
@@ -75,5 +74,22 @@ public class DepartmentSpinnerAdapter extends BaseAdapter {
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         return super.getDropDownView(position, convertView, parent);
+    }
+
+    public List<String> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(List<String> departments) {
+        this.departments = departments;
+    }
+
+    public Map<String, List<Employee>> getEmployeesDeptMap() {
+        return mEmployeesDeptMap;
+    }
+
+    public void setEmployeesDeptMap(Map<String, List<Employee>> employeesDeptMap) {
+        mEmployeesDeptMap = employeesDeptMap;
+        departments = new ArrayList<>(mEmployeesDeptMap.keySet());
     }
 }
