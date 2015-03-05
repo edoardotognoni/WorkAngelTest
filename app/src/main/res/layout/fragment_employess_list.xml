@@ -53,10 +53,11 @@
                     android:textColor="@color/main_color"/>
 
             <SearchView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:iconifiedByDefault="false"
                     android:visibility="gone"
+                    android:iconifiedByDefault="false"
+                    android:hint="@string/search_name_hint"
                     android:id="@+id/employees_search"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"/>

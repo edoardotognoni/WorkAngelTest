@@ -24,5 +24,6 @@
     <string name="respond_to">Respond to:</string>
     <string name="subordinates">Subordinates:</string>
     <string name="none">None</string>
+    <string name="search_name_hint">Search employee name…</string>
 
 </resources>
