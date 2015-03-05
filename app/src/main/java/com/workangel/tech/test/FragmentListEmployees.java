@@ -32,11 +32,16 @@ import java.util.*;
 public class FragmentListEmployees extends Fragment implements LoaderManager.LoaderCallbacks<List<Employee>>{
     private static final String TAG = FragmentListEmployees.class.getSimpleName();
     private ListView mEmployeesListView;
+    private int mDepartmentSpinnerSelection = 0;
+    private String mQueryName = "";
+
     public static final int EMPLOYEES_LOADER_ID = 1000;
     /**
-     * Key used to retain the list on orientation changes
+     * Keys used to retain the list on orientation changes
      */
     public static final String KEY_EMPLOYEES_LIST = "key_employees_list";
+    public static final String KEY_SPINNER_DEPT_SELECTION = "key_spinner_selection";
+    public static final String KEY_QUERY_NAME = "key_query_name";
     /**
      * Full list of employees
      */
@@ -65,14 +70,12 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             boolean isLoaded = false;
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mDepartmentSpinnerSelection = position;
                 if (!isLoaded) {
                     isLoaded = true;
                     return;
                 }
-                String departmentChosen = (String) parent.getItemAtPosition(position);
-                List<Employee> employeesForDept = mDepartmentEmployeesMap.get(departmentChosen);
-                mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(),employeesForDept));
-                mEmployeesSearch.setQuery("",false);
+                filter();
             }
 
             @Override
@@ -89,19 +92,11 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
-                String department = (String) mDepartmentSpinner.getSelectedItem();
-                //First filter for department
-                List<Employee> employeesForDeprt = mDepartmentEmployeesMap.get(department);
-                if (adapter != null) {
-                    if (employeesForDeprt == null) {
-                        //Just in case
-                        employeesForDeprt = new ArrayList<Employee>();
-                    }
-
-                    adapter.setEmployees(getEmployeesFilteredForName(employeesForDeprt,newText));
-                    adapter.notifyDataSetChanged();
-
+                mQueryName = newText;
+                //After orientation changes this method is called before everything. We'll wait for
+                // the instance to be restored
+                if (mDepartmentEmployeesMap != null) {
+                    filter();
                 }
                 return true;
             }
@@ -118,13 +113,13 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             }
         });
         /**
-         * If we come from a configuration change, show old data. We don't need to
+         * If we come from a configuration change, don't make a new call. We don't need to
          * call the API every time we change from portrait to landscape and viceversa
          */
         if (savedInstanceState != null) {
             mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
-            mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(), mEmployeesList));
-            buildDepartmentMap(mEmployeesList);
+            mDepartmentSpinnerSelection = savedInstanceState.getInt(KEY_SPINNER_DEPT_SELECTION);
+            mQueryName = savedInstanceState.getString(KEY_QUERY_NAME);
         }
         else {
             //Make the API call to get employees data
@@ -162,14 +157,36 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                 }
             });
 
-            /**
-             * While we wait for the API call to finish, we show old data from DB
-             */
-            getLoaderManager().initLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
         }
+
+        /**
+         * While we wait for the API call to finish, we show old data from DB
+         */
+        getLoaderManager().initLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
+
         return root;
     }
 
+
+    private void filter() {
+        //First filter for department
+        String department = (String) mDepartmentSpinner.getItemAtPosition(mDepartmentSpinnerSelection);
+        List<Employee> employeesForDeptChosen = mDepartmentEmployeesMap.get(department);
+
+        //Get employee for text query filter
+        List<Employee> employeeFiltered = getEmployeesFilteredForName(employeesForDeptChosen, mQueryName);
+
+        //Update UI
+        EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
+        if (adapter == null) {
+            adapter = new EmployeesListAdapter(getActivity(),employeeFiltered);
+            mEmployeesListView.setAdapter(adapter);
+        }
+        else {
+            adapter.setEmployees(employeeFiltered);
+            adapter.notifyDataSetChanged();
+        }
+    }
     /**
      * Build a map where keys are Department String and values are Lists of all
      * the Employees of that department
@@ -200,6 +217,10 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             adapter.notifyDataSetChanged();
         }
 
+        //If we come from a configuration change, we set the old values to the spinner and searchview
+        //At first launch this set the selection to 0 and set an empty string. Sounds good to me.
+        mDepartmentSpinner.setSelection(mDepartmentSpinnerSelection);
+        mEmployeesSearch.setQuery(mQueryName,false);
         //Show filter views
         mDepartmentSpinner.setVisibility(View.VISIBLE);
         mEmployeesSearch.setVisibility(View.VISIBLE);
@@ -232,6 +253,8 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(KEY_EMPLOYEES_LIST,
                                         (java.util.ArrayList<? extends android.os.Parcelable>) mEmployeesList);
+        outState.putInt(KEY_SPINNER_DEPT_SELECTION, mDepartmentSpinnerSelection);
+        outState.putString(KEY_QUERY_NAME, mQueryName);
     }
 
     /**
@@ -275,20 +298,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         if (isAdded()) {
             buildDepartmentMap(mEmployeesList);
             mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
-            //Better pick list from Map becuase probably user has already selected a department
-            String department = (String) mDepartmentSpinner.getSelectedItem();
-            List<Employee> employeesForDeptChosen = mDepartmentEmployeesMap.get(department);
-            //Update UI
-            EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
-            List<Employee> employeesFiltered = getEmployeesFilteredForName(employeesForDeptChosen,mEmployeesSearch.getQuery().toString());
-            if (adapter == null) {
-                adapter = new EmployeesListAdapter(getActivity(),employeesFiltered);
-                mEmployeesListView.setAdapter(adapter);
-            }
-            else {
-                adapter.setEmployees(employeesFiltered);
-                adapter.notifyDataSetChanged();
-            }
+            filter();
         }
     }
 

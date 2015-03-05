@@ -1,11 +1,13 @@
 package com.workangel.tech.test.hierarchy;
 
+import android.os.Parcelable;
+
 import java.util.List;
 
 /**
  * Node of a hierarchy tree. Each Node holds a reference to its parent and its children
  */
-public class Node<T> {
+public class Node<T extends Parcelable> {
     private static final String TAG = Node.class.getSimpleName();
     /**
      * Node data
