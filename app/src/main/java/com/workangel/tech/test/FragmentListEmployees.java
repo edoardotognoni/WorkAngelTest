@@ -36,7 +36,13 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
      * Key used to retain the list on orientation changes
      */
     public static final String KEY_EMPLOYEES_LIST = "key_employees_list";
+    /**
+     * Full list of employees
+     */
     private List<Employee> mEmployeesList;
+    /**
+     *
+     */
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;
     private SearchView mEmployeesSearch;
@@ -49,6 +55,30 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mEmployeesListView = (ListView) root.findViewById(R.id.employees_list);
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
         mEmployeesSearch = (SearchView) root.findViewById(R.id.employees_search);
+
+        mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
+            // this behaviour so I hadd a bit of logic to call the method only when the user
+            // actually selects the item
+            boolean isLoaded = false;
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!isLoaded) {
+                    isLoaded = true;
+                    return;
+                }
+                String departmentChosen = (String) parent.getItemAtPosition(position);
+                List<Employee> employeesForDept = mDepartmentEmployeesMap.get(departmentChosen);
+                mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(),employeesForDept));
+                mEmployeesSearch.setQuery("",false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         mEmployeesSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -74,6 +104,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                 return true;
             }
         });
+
         /**
          * Set a click listener to move to the employee detail fragment
          */
@@ -166,27 +197,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             adapter.setEmployeesDeptMap(mDepartmentEmployeesMap);
             adapter.notifyDataSetChanged();
         }
-        mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
-            // this behaviour so I hadd a bit of logic to call the method only when the user
-            // actually selects the item
-            boolean isLoaded = false;
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!isLoaded) {
-                    isLoaded = true;
-                    return;
-                }
-                String departmentChosen = (String) parent.getItemAtPosition(position);
-                List<Employee> employeesForDept = mDepartmentEmployeesMap.get(departmentChosen);
-                mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(),employeesForDept));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
         //Show filter views
         mDepartmentSpinner.setVisibility(View.VISIBLE);

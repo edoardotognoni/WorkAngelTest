@@ -54,6 +54,10 @@ public class DepartmentSpinnerAdapter extends BaseAdapter {
         return position;
     }
 
+    public List<Employee> getEmployeesForDept(String dept) {
+        return mEmployeesDeptMap.get(dept);
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;

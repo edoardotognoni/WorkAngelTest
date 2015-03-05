@@ -44,6 +44,8 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         }
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+        //After orientation change, check how many fragments we have
+        onBackStackChanged();
     }
 
     @Override
