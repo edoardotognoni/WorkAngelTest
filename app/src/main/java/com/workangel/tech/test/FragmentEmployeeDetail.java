@@ -6,13 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.koushikdutta.ion.Ion;
 import com.workangel.tech.test.database.bean.Employee;
+import com.workangel.tech.test.hierarchy.Node;
 
 import java.util.Locale;
 
@@ -27,6 +26,7 @@ public class FragmentEmployeeDetail extends Fragment {
     public static final String KEY_EMPLOYEE = "key_employess";
     public static final String KEY_NODE = "key_tree_node";
     private Employee mEmployee;
+    private Node mNode;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -34,9 +34,11 @@ public class FragmentEmployeeDetail extends Fragment {
         View root = inflater.inflate(R.layout.fragment_employee_detail, container, false);
         if (savedInstanceState != null) {
             mEmployee = savedInstanceState.getParcelable(KEY_EMPLOYEE);
+            mNode = savedInstanceState.getParcelable(KEY_NODE);
         }
         else {
             mEmployee = getArguments().getParcelable(KEY_EMPLOYEE);
+            mNode = getArguments().getParcelable(KEY_NODE);
         }
 
         ImageView employeeAvatar = (ImageView) root.findViewById(R.id.employee_avatar);
@@ -98,9 +100,24 @@ public class FragmentEmployeeDetail extends Fragment {
                 showMap(mEmployee.getAddress());
             }
         });
+        setHasOptionsMenu(true);
         return root;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_share, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                shareContact(mEmployee);
+                break;
+        }
+        return true;
+    }
 
     private void sendEmail(String address) {
         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto",address, null));
@@ -126,9 +143,33 @@ public class FragmentEmployeeDetail extends Fragment {
         intent.setData(Uri.parse(uri));
         startActivity(intent);
     }
+
+    /**
+     * Share employee detail in a simple text format.
+     *
+     * @param employee Employee to share
+     */
+    private void shareContact(Employee employee) {
+        //I decided to share only a few data but we can go for a lot more. Like posting on FB or G+, post its Avatar on Instagram,...
+        String shareBody = getString(R.string.share_text_args,
+                                     employee.getFirstName(),
+                                     employee.getLastName(),
+                                     employee.getPhone(),
+                                     employee.getAddress(),
+                                     employee.getEmail(),
+                                     employee.getAbout());
+
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, employee.getLastName() + " " + employee.getFirstName());
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+        startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_using)));
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEY_EMPLOYEE, mEmployee);
+        outState.putParcelable(KEY_NODE, mNode);
     }
 }
