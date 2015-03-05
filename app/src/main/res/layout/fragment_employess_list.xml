@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/filters_bg_color">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/department"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="right"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/toolbar_title_color"/>
+
+            <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/department_spinner"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/name"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="right"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/toolbar_title_color"/>
+
+            <SearchView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:iconifiedByDefault="false"
+                    android:focusable="false"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/employees_list"
+              android:background="@color/main_background_color">
+
+    </ListView>
+</LinearLayout>

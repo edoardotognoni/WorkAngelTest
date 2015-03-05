@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.network.Constants;
@@ -22,7 +23,10 @@ import de.greenrobot.event.EventBus;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Fragment showing the Employees list. It uses the LoaderManager pattern to retrieve
@@ -30,22 +34,28 @@ import java.util.List;
  */
 public class FragmentListEmployees extends Fragment implements LoaderManager.LoaderCallbacks<List<Employee>>{
     private static final String TAG = FragmentListEmployees.class.getSimpleName();
-    private ListView mRoot;
+    private ListView employeesListView;
     public static final int EMPLOYEES_LOADER_ID = 1000;
     /**
      * Key used to retain the list on orientation changes
      */
     public static final String KEY_EMPLOYEES_LIST = "key_employees_list";
     private List<Employee> mEmployeesList;
+    private Map<String,List<Employee>> mDepartmentEmployeesMap;
+    private Spinner mDepartmentSpinner;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRoot = (ListView) inflater.inflate(R.layout.simple_list_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_employess_list, container, false);
+
+        employeesListView = (ListView) root.findViewById(R.id.employees_list);
+        mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
+
         /**
          * Set a click listener to move to the employee detail fragment
          */
-        mRoot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        employeesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Employee employee = (Employee) parent.getItemAtPosition(position);
@@ -58,7 +68,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
          */
         if (savedInstanceState != null) {
             mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
-            mRoot.setAdapter(new EmployeesListAdapter(getActivity(),mEmployeesList));
+            employeesListView.setAdapter(new EmployeesListAdapter(getActivity(), mEmployeesList));
         }
         else {
             //Make the API call to get employees data
@@ -101,7 +111,28 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
              */
             getLoaderManager().initLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
         }
-        return mRoot;
+        return root;
+    }
+
+    /**
+     * Build a map where keys are Department String and values are Lists of all
+     * the Employees of that department
+     * @param fullEmployeesList
+     */
+    private void buildDepartmentMap(List<Employee> fullEmployeesList) {
+        mDepartmentEmployeesMap = new HashMap<>();
+        for (Employee employee : fullEmployeesList) {
+            List<Employee> employeesForDept = mDepartmentEmployeesMap.get(employee.getDepartment());
+            if (employeesForDept == null) {
+                employeesForDept = new ArrayList<>();
+                mDepartmentEmployeesMap.put(employee.getDepartment(),employeesForDept);
+            }
+
+            employeesForDept.add(employee);
+        }
+
+        //Populate department spinner
+        mDepartmentSpinner.setAdapter(new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap));
     }
 
     @Override
@@ -148,11 +179,12 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<List<Employee>> loader, List<Employee> data) {
         mEmployeesList = data;
         if (isAdded()) {
+            buildDepartmentMap(mEmployeesList);
             //Update UI
-            EmployeesListAdapter adapter = (EmployeesListAdapter) mRoot.getAdapter();
+            EmployeesListAdapter adapter = (EmployeesListAdapter) employeesListView.getAdapter();
             if (adapter == null) {
                 adapter = new EmployeesListAdapter(getActivity(),data);
-                mRoot.setAdapter(adapter);
+                employeesListView.setAdapter(adapter);
             }
             else {
                 adapter.setEmployees(data);
@@ -163,6 +195,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<List<Employee>> loader) {
+        employeesListView.setAdapter(null);
     }
 
 

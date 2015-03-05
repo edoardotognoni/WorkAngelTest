@@ -9,5 +9,7 @@
     <string name="contact_request">Contact request</string>
     <string name="welcome">Welcome</string>
     <string name="work_angel">WorkAngel</string>
+    <string name="department">Department:</string>
+    <string name="name">Name:</string>
 
 </resources>
