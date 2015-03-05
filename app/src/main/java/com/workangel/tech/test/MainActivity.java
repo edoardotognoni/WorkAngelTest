@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import com.workangel.tech.test.database.bean.Employee;
+import com.workangel.tech.test.hierarchy.Node;
 import de.greenrobot.event.EventBus;
 
 
@@ -71,6 +72,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         Fragment employeeDetail = new FragmentEmployeeDetail();
         Bundle bundle = new Bundle();
         bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
+        bundle.putParcelable(FragmentEmployeeDetail.KEY_NODE, eventTransactToEmployeeDetailFragment.getNode());
         employeeDetail.setArguments(bundle);
         getSupportFragmentManager().beginTransaction()
                                    .add(R.id.fragment_container, employeeDetail)
@@ -100,13 +102,23 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
      */
     public static class EventTransactToEmployeeDetailFragment {
         private Employee mEmployee;
+        private Node mNode;
 
-        public EventTransactToEmployeeDetailFragment(Employee employee) {
+        public EventTransactToEmployeeDetailFragment(Employee employee, Node node) {
             mEmployee = employee;
+            mNode = node;
         }
 
         public Employee getEmployee() {
             return mEmployee;
+        }
+
+        public Node getNode() {
+            return mNode;
+        }
+
+        public void setNode(Node node) {
+            mNode = node;
         }
     }
 }

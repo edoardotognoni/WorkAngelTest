@@ -12,5 +12,6 @@
     <string name="department">Department:</string>
     <string name="name">Name:</string>
     <string name="all_departments">All departments</string>
+    <string name="loading">Loading…</string>
 
 </resources>

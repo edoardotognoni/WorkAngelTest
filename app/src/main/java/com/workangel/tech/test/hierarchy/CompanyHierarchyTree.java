@@ -18,7 +18,7 @@ public class CompanyHierarchyTree {
      * Map of all the tree nodes. Each key is the Employee ID and the node is the
      * actual employee data including its children and parent
      */
-    private Map<Integer,Node<Employee>> mTreeMap = new HashMap<>();
+    private Map<Integer,Node> mTreeMap = new HashMap<>();
 
     /**
      * Creates and build the hierarchy tree
@@ -35,19 +35,19 @@ public class CompanyHierarchyTree {
     private void build(List<Employee> employees) {
         //Populate first empty map
         for (Employee employee : employees) {
-            Node<Employee> node = new Node<>();
+            Node node = new Node();
             node.setData(employee);
             mTreeMap.put(employee.get_id(), node);
         }
 
         //Re - iterate list to build the actual tree with children and parents
         for (Employee employee : employees) {
-            Node<Employee> node = mTreeMap.get(employee.get_id());
+            Node node = mTreeMap.get(employee.get_id());
             //Set parent into node children
             for (int id : employee.getSubordinates()) {
-                Node<Employee> childNode = mTreeMap.get(id);
+                Node childNode = mTreeMap.get(id);
                 childNode.setParent(node);
-                List<Node<Employee>> chidlrenList = node.getChildren();
+                List<Node> chidlrenList = node.getChildren();
                 if (chidlrenList == null) {
                     chidlrenList = new ArrayList<>();
                     node.setChildren(chidlrenList);
@@ -59,7 +59,7 @@ public class CompanyHierarchyTree {
         Log.d(TAG,"Tree created");
     }
 
-    public Node<Employee> getNode(int id) {
+    public Node getNode(int id) {
         return mTreeMap.get(id);
     }
 }

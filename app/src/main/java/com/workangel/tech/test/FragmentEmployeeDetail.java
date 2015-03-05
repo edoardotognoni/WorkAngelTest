@@ -25,6 +25,7 @@ public class FragmentEmployeeDetail extends Fragment {
      * Key used to retrieve the {@link com.workangel.tech.test.database.bean.Employee employee} from the Bundle
      */
     public static final String KEY_EMPLOYEE = "key_employess";
+    public static final String KEY_NODE = "key_tree_node";
     private Employee mEmployee;
 
     @Override

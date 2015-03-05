@@ -1,7 +1,10 @@
 package com.workangel.tech.test;
 
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -11,10 +14,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Spinner;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
+import com.workangel.tech.test.hierarchy.Node;
 import com.workangel.tech.test.network.Constants;
 import com.workangel.tech.test.network.FactoryNetworkManager;
 import com.workangel.tech.test.network.FactoryNetworkManagerInterface;
@@ -36,6 +43,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private String mQueryName = "";
 
     public static final int EMPLOYEES_LOADER_ID = 1000;
+    public static final String KEY_DOWNLOADED_ONCE = "key_downloaded_once";
     /**
      * Keys used to retain the list on orientation changes
      */
@@ -52,7 +60,11 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;
     private SearchView mEmployeesSearch;
+    /**
+     * This object represents the company's hierarchy tree.
+     */
     private CompanyHierarchyTree mCompanyTree;
+    private ProgressDialog mLoadingDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -62,6 +74,11 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mEmployeesListView = (ListView) root.findViewById(R.id.employees_list);
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
         mEmployeesSearch = (SearchView) root.findViewById(R.id.employees_search);
+
+        //Create a loading dialog for the first time we open the app
+        mLoadingDialog = new ProgressDialog(getActivity());
+        mLoadingDialog.setMessage(getString(R.string.loading));
+        mLoadingDialog.setCancelable(false);
 
         mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
@@ -109,7 +126,8 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Employee employee = (Employee) parent.getItemAtPosition(position);
-                EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
+                Node treeNode = mCompanyTree.getNode(employee.get_id());
+                EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee,treeNode));
             }
         });
         /**
@@ -122,6 +140,12 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             mQueryName = savedInstanceState.getString(KEY_QUERY_NAME);
         }
         else {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            if (!preferences.getBoolean(KEY_DOWNLOADED_ONCE,false)) {
+                //We still don't have available data. Show a loading dialog until we get some
+                mLoadingDialog.show();
+            }
+
             //Make the API call to get employees data
             FactoryNetworkManagerInterface networkManagerInterface = FactoryNetworkManager.getInstance(getActivity(),
                                                                                                        FactoryNetworkManager.NetworkFramework.RETROFIT);
@@ -133,15 +157,23 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                 public void onSuccess(List<Employee> result) {
                     Log.d(TAG, "Employees downloaded successfully");
                     if (isAdded()) {
+                        //Save that we downloaded at least once
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean(KEY_DOWNLOADED_ONCE, true);
+                        editor.commit();
+
                         //Save emplyees to DB
                         saveEmployeesAsync(result);
-
                     }
                 }
 
                 @Override
                 public void onError(int errorCode) {
                     if (isAdded()) {
+                        if (mLoadingDialog.isShowing()) {
+                            mLoadingDialog.dismiss();
+                        }
+
                         switch (errorCode) {
                             case Constants.CONVERSION_PROBLEM:
                             case Constants.UNEXPECTED_ERROR:
@@ -278,6 +310,9 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                 if (isAdded()) {
                     //Update UI by restarting loader
                     getLoaderManager().restartLoader(EMPLOYEES_LOADER_ID, null, FragmentListEmployees.this).forceLoad();
+                    if (mLoadingDialog.isShowing()) {
+                        mLoadingDialog.dismiss();
+                    }
                 }
                 super.onPostExecute(aVoid);
             }
