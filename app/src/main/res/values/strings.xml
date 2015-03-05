@@ -20,5 +20,9 @@
     <string name="dont_ask_again">Don\'t ask again</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="links">LINKS</string>
+    <string name="respond_to">Respond to:</string>
+    <string name="subordinates">Subordinates:</string>
+    <string name="none">None</string>
 
 </resources>

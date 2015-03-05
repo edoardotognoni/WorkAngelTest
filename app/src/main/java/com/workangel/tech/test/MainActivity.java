@@ -81,6 +81,22 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     }
 
     /**
+     * Called by EventBus when someone fires an {@link com.workangel.tech.test.MainActivity.EventTransactToSubordinateOrBossFragment}
+     * @param eventTransactToEmployeeDetailFragment Event
+     */
+    public void onEvent(EventTransactToSubordinateOrBossFragment eventTransactToEmployeeDetailFragment) {
+        Fragment employeeDetail = new FragmentEmployeeDetail();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
+        bundle.putParcelable(FragmentEmployeeDetail.KEY_NODE, eventTransactToEmployeeDetailFragment.getNode());
+        employeeDetail.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction()
+                                   .add(R.id.fragment_container, employeeDetail)
+                                   .addToBackStack(null)
+                                   .commit();
+    }
+
+    /**
      * Called when something in the fragments backstack changes. If the fragment backstack has more than 0 elements
      * show the home button
      */
@@ -104,7 +120,44 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         private Employee mEmployee;
         private Node mNode;
 
+        /**
+         * Constructor
+         * @param employee Employee to be displayed
+         * @param node Node representing the Employee in the Hierarchy tree
+         */
         public EventTransactToEmployeeDetailFragment(Employee employee, Node node) {
+            mEmployee = employee;
+            mNode = node;
+        }
+
+        public Employee getEmployee() {
+            return mEmployee;
+        }
+
+        public Node getNode() {
+            return mNode;
+        }
+
+        public void setNode(Node node) {
+            mNode = node;
+        }
+    }
+
+    /**
+     * This event is fired when the user clicks on a subordinate employee
+     * or on a boss employee from the Detail page
+     */
+    public static class EventTransactToSubordinateOrBossFragment {
+        private Employee mEmployee;
+        private Node mNode;
+
+        /**
+         * Constructor
+         * @param employee Employee to be displayed
+         * @param node Node representing the Employee in the Hierarchy tree
+         */
+
+        public EventTransactToSubordinateOrBossFragment(Employee employee, Node node) {
             mEmployee = employee;
             mNode = node;
         }

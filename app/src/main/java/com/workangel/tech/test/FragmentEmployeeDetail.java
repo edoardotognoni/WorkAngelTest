@@ -7,12 +7,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.*;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import com.koushikdutta.ion.Ion;
 import com.workangel.tech.test.database.bean.Employee;
 import com.workangel.tech.test.hierarchy.Node;
+import de.greenrobot.event.EventBus;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -42,7 +46,7 @@ public class FragmentEmployeeDetail extends Fragment {
         }
 
         ImageView employeeAvatar = (ImageView) root.findViewById(R.id.employee_avatar);
-        TextView employeeName = (TextView) root.findViewById(R.id.employee_name);
+        final TextView employeeName = (TextView) root.findViewById(R.id.employee_name);
         TextView employeeDepartment = (TextView) root.findViewById(R.id.employee_department);
         TextView employeeAbout = (TextView) root.findViewById(R.id.employee_about);
         TextView employeePhone = (TextView) root.findViewById(R.id.phone);
@@ -50,6 +54,48 @@ public class FragmentEmployeeDetail extends Fragment {
         TextView employeeAddress = (TextView) root.findViewById(R.id.address);
         TextView employeeEmail = (TextView) root.findViewById(R.id.email);
 
+        //Check if it has a parent
+        ViewGroup bossLayout = (ViewGroup) root.findViewById(R.id.boss_layout);
+        if (mNode.getParent() != null) {
+            final Employee boss = mNode.getParent().getData();
+            ImageView bossAvatar = (ImageView) root.findViewById(R.id.boss_avatar);
+            TextView bossName = (TextView) root.findViewById(R.id.boss_name);
+            TextView bossDepartment = (TextView) root.findViewById(R.id.boss_department);
+            Ion.with(bossAvatar).load(boss.getAvatar());
+            bossName.setText(boss.getLastName() + " " + boss.getFirstName());
+            bossDepartment.setText(getString(R.string.department_arg, boss.getDepartment()));
+            bossLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    EventBus.getDefault().post(new MainActivity.EventTransactToSubordinateOrBossFragment(boss,mNode.getParent()));
+                }
+            });
+        }
+        else {
+            bossLayout.setVisibility(View.GONE);
+            TextView respondToLabel = (TextView) root.findViewById(R.id.respond_to_label);
+            respondToLabel.setText(getString(R.string.respond_to) + " " + getString(R.string.none));
+        }
+
+        //Check if it has children
+        ListView subordinatesListView = (ListView) root.findViewById(R.id.subordinates_list_view);
+        if (mNode.getChildren() != null) {
+            List<Node> children = mNode.getChildren();
+            subordinatesListView.setAdapter(new SubordinatesListAdapter(getActivity(),children));
+            subordinatesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Node employeeNode = (Node) parent.getItemAtPosition(position);
+                    Employee employee = employeeNode.getData();
+                    EventBus.getDefault().post(new MainActivity.EventTransactToSubordinateOrBossFragment(employee,employeeNode));
+                }
+            });
+        }
+        else {
+            TextView subordinatesLabel = (TextView) root.findViewById(R.id.subordinates_label);
+            subordinatesLabel.setText(getString(R.string.subordinates) + " " + getString(R.string.none));
+        }
         Ion.with(employeeAvatar).load(mEmployee.getAvatar());
         employeeName.setText(mEmployee.getLastName() + " " + mEmployee.getFirstName());
         employeeDepartment.setText(mEmployee.getDepartment().toUpperCase(Locale.US));

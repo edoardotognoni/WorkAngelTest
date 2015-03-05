@@ -4,6 +4,7 @@
     <color name="filters_bg_color">#88EEEEEE</color>
     <color name="main_color">#F57C00</color>
     <color name="main_color_pressed">#FF9800</color>
+    <color name="accentColor">#8BC34A</color>
 
     <color name="button_shadow">#ccc</color>
 </resources>
