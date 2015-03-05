@@ -23,10 +23,7 @@ import de.greenrobot.event.EventBus;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Fragment showing the Employees list. It uses the LoaderManager pattern to retrieve
@@ -34,7 +31,7 @@ import java.util.Map;
  */
 public class FragmentListEmployees extends Fragment implements LoaderManager.LoaderCallbacks<List<Employee>>{
     private static final String TAG = FragmentListEmployees.class.getSimpleName();
-    private ListView employeesListView;
+    private ListView mEmployeesListView;
     public static final int EMPLOYEES_LOADER_ID = 1000;
     /**
      * Key used to retain the list on orientation changes
@@ -49,13 +46,13 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_employess_list, container, false);
 
-        employeesListView = (ListView) root.findViewById(R.id.employees_list);
+        mEmployeesListView = (ListView) root.findViewById(R.id.employees_list);
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
 
         /**
          * Set a click listener to move to the employee detail fragment
          */
-        employeesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mEmployeesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Employee employee = (Employee) parent.getItemAtPosition(position);
@@ -68,7 +65,8 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
          */
         if (savedInstanceState != null) {
             mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
-            employeesListView.setAdapter(new EmployeesListAdapter(getActivity(), mEmployeesList));
+            mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(), mEmployeesList));
+            buildDepartmentMap(mEmployeesList);
         }
         else {
             //Make the API call to get employees data
@@ -120,7 +118,9 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
      * @param fullEmployeesList
      */
     private void buildDepartmentMap(List<Employee> fullEmployeesList) {
-        mDepartmentEmployeesMap = new HashMap<>();
+        mDepartmentEmployeesMap = new LinkedHashMap<>();
+        //Here I add the ALL department key
+        mDepartmentEmployeesMap.put(getString(R.string.all_departments),fullEmployeesList);
         for (Employee employee : fullEmployeesList) {
             List<Employee> employeesForDept = mDepartmentEmployeesMap.get(employee.getDepartment());
             if (employeesForDept == null) {
@@ -133,6 +133,27 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
         //Populate department spinner
         mDepartmentSpinner.setAdapter(new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap));
+        mDepartmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            //When setOnItemSelectedListener is set, it auto calls onItemSelected at first. I don't want
+            // this behaviour so I hadd a bit of logic to call the method only when the user
+            // actually selects the item
+            boolean isLoaded = false;
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!isLoaded) {
+                    isLoaded = true;
+                    return;
+                }
+                String departmentChosen = (String) parent.getItemAtPosition(position);
+                List<Employee> employeesForDept = mDepartmentEmployeesMap.get(departmentChosen);
+                mEmployeesListView.setAdapter(new EmployeesListAdapter(getActivity(),employeesForDept));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     @Override
@@ -181,10 +202,10 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         if (isAdded()) {
             buildDepartmentMap(mEmployeesList);
             //Update UI
-            EmployeesListAdapter adapter = (EmployeesListAdapter) employeesListView.getAdapter();
+            EmployeesListAdapter adapter = (EmployeesListAdapter) mEmployeesListView.getAdapter();
             if (adapter == null) {
                 adapter = new EmployeesListAdapter(getActivity(),data);
-                employeesListView.setAdapter(adapter);
+                mEmployeesListView.setAdapter(adapter);
             }
             else {
                 adapter.setEmployees(data);
@@ -195,7 +216,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<List<Employee>> loader) {
-        employeesListView.setAdapter(null);
+        mEmployeesListView.setAdapter(null);
     }
 
 

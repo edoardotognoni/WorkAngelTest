@@ -11,5 +11,6 @@
     <string name="work_angel">WorkAngel</string>
     <string name="department">Department:</string>
     <string name="name">Name:</string>
+    <string name="all_departments">All departments</string>
 
 </resources>
