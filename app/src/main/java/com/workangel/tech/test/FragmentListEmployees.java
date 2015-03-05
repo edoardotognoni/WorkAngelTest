@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.workangel.tech.test.database.DatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
+import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
 import com.workangel.tech.test.network.Constants;
 import com.workangel.tech.test.network.FactoryNetworkManager;
 import com.workangel.tech.test.network.FactoryNetworkManagerInterface;
@@ -46,6 +47,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;
     private SearchView mEmployeesSearch;
+    private CompanyHierarchyTree mCompanyTree;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -214,7 +216,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             return employees;
         }
         else {
-            List<Employee> filteredEmployees = new ArrayList<Employee>();
+            List<Employee> filteredEmployees = new ArrayList<>();
             for (Employee  employee : employees) {
                 String name = (employee.getLastName() + " " + employee.getFirstName()).toUpperCase(Locale.US);
                 if (name.contains(filter.toUpperCase(Locale.US))) {
@@ -272,6 +274,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mEmployeesList = data;
         if (isAdded()) {
             buildDepartmentMap(mEmployeesList);
+            mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
             //Better pick list from Map becuase probably user has already selected a department
             String department = (String) mDepartmentSpinner.getSelectedItem();
             List<Employee> employeesForDeptChosen = mDepartmentEmployeesMap.get(department);
