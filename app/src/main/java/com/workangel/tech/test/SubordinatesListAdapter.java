@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.workangel.tech.test.database.bean.Employee;
-import com.workangel.tech.test.hierarchy.Node;
 
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +16,7 @@ import java.util.Locale;
  */
 public class SubordinatesListAdapter extends BaseAdapter {
     private Context mContext;
-    private List<Node> mChildren;
+    private List<Employee> mChildren;
 
     private static class ViewHolder {
         TextView subordinateName;
@@ -28,7 +27,7 @@ public class SubordinatesListAdapter extends BaseAdapter {
      * @param children Childrend
      *
      */
-    public SubordinatesListAdapter(Context context, List<Node> children) {
+    public SubordinatesListAdapter(Context context, List<Employee> children) {
         mContext = context;
         mChildren = children;
     }
@@ -61,8 +60,7 @@ public class SubordinatesListAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Node child = mChildren.get(position);
-        Employee employee = child.getData();
+        Employee employee = mChildren.get(position);
         String department = "(" + employee.getDepartment().toUpperCase(Locale.US) + ")";
         holder.subordinateName.setText(employee.getFirstName() + " " + employee.getLastName() + " " + department);
         return convertView;

@@ -14,7 +14,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.koushikdutta.ion.Ion;
 import com.workangel.tech.test.database.bean.Employee;
-import com.workangel.tech.test.hierarchy.Node;
 import de.greenrobot.event.EventBus;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -31,22 +30,20 @@ public class FragmentEmployeeDetail extends Fragment {
      * Key used to retrieve the {@link com.workangel.tech.test.database.bean.Employee employee} from the Bundle
      */
     public static final String KEY_EMPLOYEE = "key_employess";
-    public static final String KEY_NODE = "key_tree_node";
+    public static final String KEY_BOSS = "key_boss";
+    public static final String KEY_SUBORDINATES = "key_subordinates";
     private Employee mEmployee;
-    private Node mNode;
+    private Employee mBoss;
+    private List<Employee> mChildren;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_employee_detail, container, false);
-        if (savedInstanceState != null) {
-            mEmployee = savedInstanceState.getParcelable(KEY_EMPLOYEE);
-            mNode = savedInstanceState.getParcelable(KEY_NODE);
-        }
-        else {
-            mEmployee = getArguments().getParcelable(KEY_EMPLOYEE);
-            mNode = getArguments().getParcelable(KEY_NODE);
-        }
+
+        mEmployee = getArguments().getParcelable(KEY_EMPLOYEE);
+        mBoss = getArguments().getParcelable(KEY_BOSS);
+        mChildren = getArguments().getParcelableArrayList(KEY_SUBORDINATES);
 
         ImageView employeeAvatar = (ImageView) root.findViewById(R.id.employee_avatar);
         final TextView employeeName = (TextView) root.findViewById(R.id.employee_name);
@@ -57,25 +54,20 @@ public class FragmentEmployeeDetail extends Fragment {
         TextView employeeAddress = (TextView) root.findViewById(R.id.address);
         TextView employeeEmail = (TextView) root.findViewById(R.id.email);
 
-        //Empty object if null
-        if (mNode == null) {
-            mNode = new Node();
-        }
         //Check if it has a parent
         ViewGroup bossLayout = (ViewGroup) root.findViewById(R.id.boss_layout);
-        if (mNode.getParent() != null) {
-            final Employee boss = mNode.getParent().getData();
+        if (mBoss != null) {
             ImageView bossAvatar = (ImageView) root.findViewById(R.id.boss_avatar);
             TextView bossName = (TextView) root.findViewById(R.id.boss_name);
             TextView bossDepartment = (TextView) root.findViewById(R.id.boss_department);
-            Ion.with(bossAvatar).load(boss.getAvatar());
-            bossName.setText(boss.getLastName() + " " + boss.getFirstName());
-            bossDepartment.setText(getString(R.string.department_arg, boss.getDepartment()));
+            Ion.with(bossAvatar).load(mBoss.getAvatar());
+            bossName.setText(mBoss.getLastName() + " " + mBoss.getFirstName());
+            bossDepartment.setText(getString(R.string.department_arg, mBoss.getDepartment()));
             bossLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(boss,mNode.getParent()));
+                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(mBoss));
                 }
             });
         }
@@ -87,15 +79,13 @@ public class FragmentEmployeeDetail extends Fragment {
 
         //Check if it has children
         ListView subordinatesListView = (ListView) root.findViewById(R.id.subordinates_list_view);
-        if (mNode.getChildren() != null) {
-            List<Node> children = mNode.getChildren();
-            subordinatesListView.setAdapter(new SubordinatesListAdapter(getActivity(),children));
+        if (mChildren != null) {
+            subordinatesListView.setAdapter(new SubordinatesListAdapter(getActivity(), mChildren));
             subordinatesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Node employeeNode = (Node) parent.getItemAtPosition(position);
-                    Employee employee = employeeNode.getData();
-                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee,employeeNode));
+                    Employee employee = (Employee) parent.getItemAtPosition(position);
+                    EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
                 }
             });
         }
@@ -241,10 +231,4 @@ public class FragmentEmployeeDetail extends Fragment {
         startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_using)));
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelable(KEY_EMPLOYEE, mEmployee);
-        outState.putParcelable(KEY_NODE, mNode);
-    }
 }

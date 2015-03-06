@@ -20,6 +20,7 @@ import com.workangel.tech.test.contacts.ContactsSaverIntentService;
 import com.workangel.tech.test.database.FactoryDatabaseInterface;
 import com.workangel.tech.test.database.FactoryDatabaseManager;
 import com.workangel.tech.test.database.bean.Employee;
+import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
 import com.workangel.tech.test.hierarchy.Node;
 import com.workangel.tech.test.network.Constants;
 import com.workangel.tech.test.network.FactoryNetworkManager;
@@ -38,6 +39,10 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
 
     public static final String KEY_DOWNLOADED_ONCE = "key_downloaded_once";
     private ProgressDialog mLoadingDialog;
+    /**
+     * This object represents the company's hierarchy tree.
+     */
+    private CompanyHierarchyTree mCompanyTree;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +186,14 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
     }
 
     /**
+     * Build the company hierarchy tree and saves it into the class variable
+     * @param employeesList Full employees list
+     */
+    public void buildHierarchyTree(List<Employee> employeesList) {
+        mCompanyTree = new CompanyHierarchyTree(employeesList);
+    }
+
+    /**
      * Shows a dialog to the user which will ask if he wants employees to be
      * saved on its contacts
      *
@@ -254,10 +267,26 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         else {
             transaction.addToBackStack(null);
         }
+
+        /**
+         * Retrieve employee children from the company tree
+         */
+        Employee employee = eventTransactToEmployeeDetailFragment.getEmployee();
+        Node employeeNode = mCompanyTree.getNode(employee.get_id());
+        List<Employee> subordinates = new ArrayList<>();
+        if (employeeNode.getChildren() != null) {
+            for (Node child : employeeNode.getChildren()) {
+                subordinates.add(child.getData());
+            }
+        }
+
         Fragment employeeDetail = new FragmentEmployeeDetail();
         Bundle bundle = new Bundle();
         bundle.putParcelable(FragmentEmployeeDetail.KEY_EMPLOYEE, eventTransactToEmployeeDetailFragment.getEmployee());
-        bundle.putParcelable(FragmentEmployeeDetail.KEY_NODE, eventTransactToEmployeeDetailFragment.getNode());
+        if (employeeNode.getParent() != null) {
+            bundle.putParcelable(FragmentEmployeeDetail.KEY_BOSS, employeeNode.getParent().getData());
+        }
+        bundle.putParcelableArrayList(FragmentEmployeeDetail.KEY_SUBORDINATES, (ArrayList<? extends Parcelable>) subordinates);
         employeeDetail.setArguments(bundle);
         transaction.replace(resource, employeeDetail)
                    .commit();
@@ -280,36 +309,27 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         }
     }
 
+
     /**
      * Sending an EventTransactToEmployeeDetailFragment lets you move to the
      * Employee detail. Used to make the fragment transaction
      */
     public static class EventTransactToEmployeeDetailFragment {
         private Employee mEmployee;
-        private Node mNode;
 
         /**
          * Constructor
          *
          * @param employee Employee to be displayed
-         * @param node     Node representing the Employee in the Hierarchy tree
          */
-        public EventTransactToEmployeeDetailFragment(Employee employee, Node node) {
+        public EventTransactToEmployeeDetailFragment(Employee employee) {
             mEmployee = employee;
-            mNode = node;
         }
 
         public Employee getEmployee() {
             return mEmployee;
         }
 
-        public Node getNode() {
-            return mNode;
-        }
-
-        public void setNode(Node node) {
-            mNode = node;
-        }
     }
 
 }

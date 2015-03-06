@@ -14,8 +14,6 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import com.workangel.tech.test.database.bean.Employee;
-import com.workangel.tech.test.hierarchy.CompanyHierarchyTree;
-import com.workangel.tech.test.hierarchy.Node;
 import de.greenrobot.event.EventBus;
 
 import java.util.*;
@@ -50,10 +48,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private Map<String,List<Employee>> mDepartmentEmployeesMap;
     private Spinner mDepartmentSpinner;
     private SearchView mEmployeesSearch;
-    /**
-     * This object represents the company's hierarchy tree.
-     */
-    private CompanyHierarchyTree mCompanyTree;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -76,8 +71,7 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Employee employee = (Employee) parent.getItemAtPosition(position);
-                Node treeNode = mCompanyTree.getNode(employee.get_id());
-                EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee,treeNode));
+                EventBus.getDefault().post(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
             }
         });
 
@@ -171,7 +165,8 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mEmployeesSearch.setVisibility(View.VISIBLE);
 
 
-        mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
+        ((MainActivity)getActivity()).buildHierarchyTree(mEmployeesList);
+
         filter();
     }
 
