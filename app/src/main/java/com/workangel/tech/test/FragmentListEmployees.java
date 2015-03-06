@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,18 +51,40 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
     private SearchView mEmployeesSearch;
 
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        /**
+         * If we come from a configuration change, don't make a new call. We don't need to
+         * call the API every time we change from portrait to landscape and viceversa
+         */
+        if (savedInstanceState != null) {
+            mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
+            mDepartmentSpinnerSelection = savedInstanceState.getInt(KEY_SPINNER_DEPT_SELECTION);
+            mQueryName = savedInstanceState.getString(KEY_QUERY_NAME);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_employess_list, container, false);
-
+        Log.e(TAG,"On create view");
         mEmployeesListView = (ListView) root.findViewById(R.id.employees_list);
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
         mEmployeesSearch = (SearchView) root.findViewById(R.id.employees_search);
 
-        mEmployeesList = new ArrayList<>();
         if (getArguments() != null) {
             mEmployeesList = getArguments().getParcelableArrayList(KEY_EMPLOYEES_LIST);
+        }
+
+        if (mEmployeesList == null) {
+            //Init loader
+            getLoaderManager().restartLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
+        }
+        else {
+            update(mEmployeesList);
         }
 
         /**
@@ -112,21 +135,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
                 return true;
             }
         });
-
-        /**
-         * If we come from a configuration change, don't make a new call. We don't need to
-         * call the API every time we change from portrait to landscape and viceversa
-         */
-        if (savedInstanceState != null) {
-            mEmployeesList = savedInstanceState.getParcelableArrayList(KEY_EMPLOYEES_LIST);
-            mDepartmentSpinnerSelection = savedInstanceState.getInt(KEY_SPINNER_DEPT_SELECTION);
-            mQueryName = savedInstanceState.getString(KEY_QUERY_NAME);
-            update(mEmployeesList);
-        }
-        else {
-            //Init loader
-            getLoaderManager().restartLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();
-        }
 
 
         return root;
