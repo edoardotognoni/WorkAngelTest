@@ -75,10 +75,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
         mDepartmentSpinner = (Spinner) root.findViewById(R.id.department_spinner);
         mEmployeesSearch = (SearchView) root.findViewById(R.id.employees_search);
 
-        if (getArguments() != null) {
-            mEmployeesList = getArguments().getParcelableArrayList(KEY_EMPLOYEES_LIST);
-        }
-
         if (mEmployeesList == null) {
             //Init loader
             getLoaderManager().restartLoader(EMPLOYEES_LOADER_ID, null, this).forceLoad();

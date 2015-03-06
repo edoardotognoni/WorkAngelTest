@@ -320,7 +320,7 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
         /**
          * Constructor
          *
-         * @param employee Employee to be displayed
+         * @param employee Employee to be displayed, not null
          */
         public EventTransactToEmployeeDetailFragment(Employee employee) {
             mEmployee = employee;

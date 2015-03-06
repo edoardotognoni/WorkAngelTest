@@ -2,7 +2,6 @@ package com.workangel.tech.test;
 
 import android.support.v4.app.Fragment;
 import com.workangel.tech.test.database.bean.Employee;
-import com.workangel.tech.test.hierarchy.Node;
 
 import java.util.ArrayList;
 
@@ -36,11 +35,9 @@ public class MainActivityTest extends android.test.ActivityInstrumentationTestCa
                      * Simulate click on a fake Employee
                      */
                     Employee employee = new Employee();
-                    Node treeNode = null;
                     assertNotNull(employee);
-                    mMainActivity.onEvent(new MainActivity.EventTransactToEmployeeDetailFragment(employee, treeNode));
-                    mMainActivity.onEvent(new MainActivity.EventTransactToEmployeeDetailFragment(employee, new Node()));
-                    mMainActivity.onEvent(new MainActivity.EventTransactToEmployeeDetailFragment(null, new Node()));
+                    mMainActivity.onEvent(new MainActivity.EventTransactToEmployeeDetailFragment(employee));
+                    mMainActivity.onEvent(new MainActivity.EventTransactToEmployeeDetailFragment(null));
                 }
             });
         }
