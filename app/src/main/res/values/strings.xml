@@ -26,5 +26,9 @@
     <string name="none">None</string>
     <string name="search_name_hint">Search employee name…</string>
     <string name="dont_have_google_maps">Don\'t have Google Maps? Bad guy...</string>
+    <string name="no_data_attacched">Error: No data attacched to this employee</string>
+    <string name="cant_send_sms">Can\'t send an SMS with this device</string>
+    <string name="cant_make_calls">This device can\'t make calls</string>
+    <string name="cant_send_email">Can\'t send email from this device</string>
 
 </resources>

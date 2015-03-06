@@ -143,8 +143,34 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
      * @param fullList
      */
     public void update(List<Employee> fullList) {
-        mEmployeesList = fullList;
+        if (fullList == null) {
+            mEmployeesList = new ArrayList<>();
+        }
+        else {
+            mEmployeesList = fullList;
+        }
         buildDepartmentMap(mEmployeesList);
+
+        //Populate department spinner withouth losing previous selection
+        DepartmentSpinnerAdapter adapter = (DepartmentSpinnerAdapter) mDepartmentSpinner.getAdapter();
+        if (adapter == null) {
+            adapter = new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap);
+            mDepartmentSpinner.setAdapter(adapter);
+        }
+        else {
+            adapter.setEmployeesDeptMap(mDepartmentEmployeesMap);
+            adapter.notifyDataSetChanged();
+        }
+
+        //If we come from a configuration change, we set the old values to the spinner and searchview
+        //At first launch this set the selection to 0 and set an empty string. Sounds good to me.
+        mDepartmentSpinner.setSelection(mDepartmentSpinnerSelection);
+        mEmployeesSearch.setQuery(mQueryName, false);
+        //Show filter views
+        mDepartmentSpinner.setVisibility(View.VISIBLE);
+        mEmployeesSearch.setVisibility(View.VISIBLE);
+
+
         mCompanyTree = new CompanyHierarchyTree(mEmployeesList);
         filter();
     }
@@ -191,24 +217,6 @@ public class FragmentListEmployees extends Fragment implements LoaderManager.Loa
             employeesForDept.add(employee);
         }
 
-        //Populate department spinner withouth losing previous selection
-        DepartmentSpinnerAdapter adapter = (DepartmentSpinnerAdapter) mDepartmentSpinner.getAdapter();
-        if (adapter == null) {
-            adapter = new DepartmentSpinnerAdapter(getActivity(),mDepartmentEmployeesMap);
-            mDepartmentSpinner.setAdapter(adapter);
-        }
-        else {
-            adapter.setEmployeesDeptMap(mDepartmentEmployeesMap);
-            adapter.notifyDataSetChanged();
-        }
-
-        //If we come from a configuration change, we set the old values to the spinner and searchview
-        //At first launch this set the selection to 0 and set an empty string. Sounds good to me.
-        mDepartmentSpinner.setSelection(mDepartmentSpinnerSelection);
-        mEmployeesSearch.setQuery(mQueryName, false);
-        //Show filter views
-        mDepartmentSpinner.setVisibility(View.VISIBLE);
-        mEmployeesSearch.setVisibility(View.VISIBLE);
     }
 
     /**

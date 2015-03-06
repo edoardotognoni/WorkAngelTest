@@ -57,6 +57,10 @@ public class FragmentEmployeeDetail extends Fragment {
         TextView employeeAddress = (TextView) root.findViewById(R.id.address);
         TextView employeeEmail = (TextView) root.findViewById(R.id.email);
 
+        //Empty object if null
+        if (mNode == null) {
+            mNode = new Node();
+        }
         //Check if it has a parent
         ViewGroup bossLayout = (ViewGroup) root.findViewById(R.id.boss_layout);
         if (mNode.getParent() != null) {
@@ -101,7 +105,9 @@ public class FragmentEmployeeDetail extends Fragment {
         }
         Ion.with(employeeAvatar).load(mEmployee.getAvatar());
         employeeName.setText(mEmployee.getLastName() + " " + mEmployee.getFirstName());
-        employeeDepartment.setText(mEmployee.getDepartment().toUpperCase(Locale.US));
+        if (mEmployee.getDepartment() != null) {
+            employeeDepartment.setText(mEmployee.getDepartment().toUpperCase(Locale.US));
+        }
         employeeAbout.setText(mEmployee.getAbout());
         employeePhone.setText(mEmployee.getPhone());
         employeeSms.setText(mEmployee.getPhone());
@@ -173,12 +179,22 @@ public class FragmentEmployeeDetail extends Fragment {
         intent.putExtra(Intent.EXTRA_EMAIL, address);
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.contact_request));
 
-        startActivity(Intent.createChooser(intent, getString(R.string.send_mail)));
+        try {
+            startActivity(intent);
+        }
+        catch (ActivityNotFoundException ex) {
+            Crouton.makeText(getActivity(),getString(R.string.cant_send_email), Style.ALERT).show();
+        }
     }
 
     private void sendSms(String phone) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", phone, null));
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        }
+        catch (ActivityNotFoundException ex) {
+            Crouton.makeText(getActivity(),getString(R.string.cant_send_sms), Style.ALERT).show();
+        }
     }
 
     private void showMap(String address) {
@@ -195,7 +211,12 @@ public class FragmentEmployeeDetail extends Fragment {
         String uri = "tel:" + phone.trim() ;
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse(uri));
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        }
+        catch (ActivityNotFoundException ex) {
+            Crouton.makeText(getActivity(),getString(R.string.cant_make_calls), Style.ALERT).show();
+        }
     }
 
     /**

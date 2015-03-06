@@ -157,7 +157,9 @@ public class MainActivity extends ActionBarActivity implements FragmentManager.O
                                                                                         FactoryDatabaseManager
                                                                                             .DatabaseFramework.ORMLITE);
 
-                dbManager.saveEmployees(employees);
+                if (employees != null) {
+                    dbManager.saveEmployees(employees);
+                }
                 return null;
             }
 

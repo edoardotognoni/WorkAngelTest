@@ -56,8 +56,8 @@ public class Node implements Parcelable {
 
 
     protected Node(Parcel in) {
-        data = (Employee) in.readValue(Employee.class.getClassLoader());
-        parent = (Node) in.readValue(Node.class.getClassLoader());
+        data = in.readParcelable(Employee.class.getClassLoader());
+        parent = in.readParcelable(Node.class.getClassLoader());
         if (in.readByte() == 0x01) {
             children = new ArrayList<Node>();
             in.readList(children, Node.class.getClassLoader());
@@ -73,8 +73,8 @@ public class Node implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(data);
-        dest.writeValue(parent);
+        dest.writeParcelable(data,flags);
+        dest.writeParcelable(parent,flags);
         if (children == null) {
             dest.writeByte((byte) (0x00));
         } else {
